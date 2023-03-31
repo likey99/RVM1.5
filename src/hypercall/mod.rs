@@ -8,12 +8,14 @@ use crate::arch::vmm::VcpuAccessGuestState;
 use crate::arch::GuestPageTableImmut;
 use crate::error::HvResult;
 use crate::percpu::PerCpu;
+use crate::consts::{PER_CPU_ARRAY_PTR, PER_CPU_SIZE};
 
 numeric_enum! {
     #[repr(u32)]
     #[derive(Debug, Eq, PartialEq, Copy, Clone)]
     pub enum HyperCallCode {
         HypervisorDisable = 0,
+        HypervisorCellCreate = 1,        
     }
 }
 
@@ -62,6 +64,7 @@ impl<'a> HyperCall<'a> {
         debug!("HyperCall: {:?} => arg0={:#x}", code, arg0);
         let ret = match code {
             HyperCallCode::HypervisorDisable => self.hypervisor_disable(),
+            HyperCallCode::HypervisorCellCreate=> self.hypervisor_cell_create(),
         };
         if ret.is_err() {
             warn!("HyperCall: {:?} <= {:x?}", code, ret);
@@ -95,5 +98,21 @@ impl<'a> HyperCall<'a> {
 
         self.cpu_data.deactivate_vmm(0)?;
         unreachable!()
+    }
+    fn hypervisor_cell_create(&mut self) -> HyperCallResult {
+        
+        let test_cpu=0;
+        if test_cpu==self.cpu_data.id{
+            let test_cpu=1;
+        }
+        info!("on cpu {:?} exec cell create", self.cpu_data.id);
+        info!("target cpu {:?}",test_cpu);
+
+        unsafe{
+            let target_cpu:*mut PerCpu  =(PER_CPU_ARRAY_PTR as usize + test_cpu as usize * PER_CPU_SIZE) as *mut PerCpu;
+            (*target_cpu).vcpu.setup_vmcs_control_timer(true);
+
+        }
+        Ok(1)
     }
 }

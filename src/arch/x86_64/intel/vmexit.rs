@@ -52,6 +52,7 @@ impl VmExit<'_> {
             VmxExitReason::MSR_READ => self.handle_msr_read(),
             VmxExitReason::MSR_WRITE => self.handle_msr_write(),
             VmxExitReason::EPT_VIOLATION => self.handle_ept_violation(&exit_info),
+            VmxExitReason::PREEMPTION_TIMER => self.handle_timer(),
             VmxExitReason::TRIPLE_FAULT => {
                 error!("Triple fault: {:#x?}", exit_info);
                 self.cpu_data.vcpu.inject_fault()?;

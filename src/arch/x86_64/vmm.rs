@@ -130,6 +130,12 @@ impl VmExit<'_> {
         HyperCall::new(self.cpu_data).hypercall(code as _, arg0, arg1)?;
         Ok(())
     }
+    pub fn handle_timer(&mut self) -> HvResult {
+        
+        trace!("vmm handle timer");
+        self.cpu_data.vcpu.setup_vmcs_control_timer(false);
+        Ok(())
+    }
 
     #[allow(dead_code)]
     fn test_read_guest_memory(&self, gvaddr: usize, size: usize) -> HvResult {

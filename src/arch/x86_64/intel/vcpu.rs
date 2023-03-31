@@ -361,6 +361,28 @@ impl Vcpu {
 
         Ok(())
     }
+
+    pub fn setup_vmcs_control_timer(&mut self,flag:bool)->HvResult{
+        use vmx::flags::PinVmExecControls as PinCtrl;
+        if flag{
+            Vmcs::set_control(
+                VmcsField32Control::PIN_BASED_VM_EXEC_CONTROL,
+                Msr::IA32_VMX_PINBASED_CTLS.read(),
+                // No
+                PinCtrl::PREEMPTION_TIMER.bits(),
+                0,
+            )?;
+        }else{
+            Vmcs::set_control(
+                VmcsField32Control::PIN_BASED_VM_EXEC_CONTROL,
+                Msr::IA32_VMX_PINBASED_CTLS.read(),
+                // No
+                0,
+                PinCtrl::PREEMPTION_TIMER.bits(),
+            )?;
+        }
+        Ok(())
+    }
 }
 
 impl VcpuAccessGuestState for Vcpu {
