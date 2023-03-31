@@ -1,2 +1,4 @@
 /target
+/tmp
+*.img
 .DS_Store
